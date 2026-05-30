@@ -236,12 +236,12 @@
       text-align: right;
     }
     .leg-pct {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
+      font-family: 'Instrument Serif', 'Noto Serif JP', serif;
+      font-size: clamp(1.5rem, 3vw, 2.25rem);
       color: var(--text-dim);
       min-width: 3.5rem;
       text-align: right;
-      letter-spacing: 0.05em;
+      line-height: 0.9;
     }
 
     /* WAITING OVERLAY */
@@ -360,8 +360,8 @@
 
   <script>
     const COLORS = [
-      '#FF5C00','#B8B098','#7A99A8','#A87A6E',
-      '#C9B574','#8E7AA8','#7AA890','#B88A7A'
+      '#CE9178','#4EC9B0','#9CDCFE','#DCDCAA',
+      '#C586C0','#B5CEA8','#569CD6','#F44747'
     ];
 
     let chart = null;
