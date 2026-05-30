@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index" },
     { "source": "/admin.html",   "destination": "/public/admin.html" },
     { "source": "/vote.html",    "destination": "/public/vote.html" },
     { "source": "/results.html", "destination": "/public/results.html" },
