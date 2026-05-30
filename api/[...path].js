@@ -16,8 +16,11 @@ module.exports = function handler(req, res) {
     return res.status(200).end();
   }
 
-  const segments = req.query.path || [];
-  const route = segments.join('/');
+  // Derive route from query params (Vercel catch-all) or URL (fallback)
+  const qpath = req.query.path;
+  const fromQuery = Array.isArray(qpath) ? qpath.join('/') : (typeof qpath === 'string' ? qpath : '');
+  const fromUrl = (req.url || '').replace(/^\/api\//, '').replace(/\?.*$/, '');
+  const route = fromQuery || fromUrl;
 
   // GET /api/survey
   if (route === 'survey' && req.method === 'GET') {
