@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RESULTS.SYS — LIVE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0A0A0A;
+      --surface: #141414;
+      --line: rgba(255,255,255,0.08);
+      --line-strong: rgba(255,255,255,0.18);
+      --text: #EAEAEA;
+      --text-dim: #6B6B6B;
+      --text-faint: #3F3F3F;
+      --accent: #FF5C00;
+      --accent-glow: rgba(255,92,0,0.35);
+      --live: #C5FF36;
+      --live-glow: rgba(197,255,54,0.35);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      height: 100dvh;
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: -0.01em;
+      overflow: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1, 0 0 0 0 1, 0 0 0 0 1, 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.06;
+      pointer-events: none;
+      z-index: 1000;
+      mix-blend-mode: overlay;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 2.5rem;
+      border-bottom: 1px solid var(--line);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .brand { color: var(--text); font-weight: 700; }
+    .brand .v { color: var(--text-dim); margin-left: 0.5rem; font-weight: 400; }
+    .header-right { display: flex; align-items: center; gap: 1.75rem; }
+    .live-mark {
+      color: var(--live);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+    }
+    .live-mark::before {
+      content: '';
+      width: 0.45rem;
+      height: 0.45rem;
+      background: var(--live);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--live);
+      animation: lp 1.5s infinite;
+    }
+    .live-mark.off { color: var(--text-dim); }
+    .live-mark.off::before { background: var(--text-faint); box-shadow: none; animation: none; }
+    @keyframes lp { 0%,100%{opacity:1} 50%{opacity:0.35} }
+    .total-pill {
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+    }
+    .total-pill span { color: var(--text); font-weight: 700; }
+    .btn-fs {
+      background: transparent;
+      border: 1px solid var(--line-strong);
+      color: var(--text-dim);
+      padding: 0.5rem 0.875rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+    .btn-fs:hover { color: var(--text); border-color: var(--text); }
+
+    /* QUESTION BAR */
+    .q-bar {
+      padding: 2rem 2.5rem;
+      border-bottom: 1px solid var(--line);
+      flex-shrink: 0;
+    }
+    .q-kicker {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .q-kicker::before {
+      content: '';
+      width: 2rem;
+      height: 1px;
+      background: var(--text-dim);
+    }
+    .q-text {
+      font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.2;
+    }
+
+    /* MAIN GRID */
+    .main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 2rem;
+      padding: 2rem 2.5rem;
+      align-items: center;
+      min-height: 0;
+      overflow: hidden;
+    }
+    @media (max-width: 900px) {
+      .main { grid-template-columns: 1fr; padding: 1.5rem; gap: 1.5rem; overflow-y: auto; }
+      html, body { overflow: auto; }
+    }
+
+    /* CHART */
+    .chart-area {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chart-wrap {
+      position: relative;
+      width: min(100%, 60vh);
+      aspect-ratio: 1;
+    }
+    .chart-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .center-num {
+      font-family: 'Instrument Serif', 'Noto Serif JP', serif;
+      font-size: clamp(3rem, 9vh, 7rem);
+      line-height: 0.9;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .center-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-top: 0.75rem;
+    }
+
+    /* LEGEND */
+    .legend {
+      display: flex;
+      flex-direction: column;
+      max-height: 100%;
+      overflow-y: auto;
+    }
+    .legend::-webkit-scrollbar { width: 4px; }
+    .legend::-webkit-scrollbar-thumb { background: var(--line-strong); }
+    .legend-item {
+      display: grid;
+      grid-template-columns: 3rem 0.75rem 1fr auto auto;
+      gap: 1rem;
+      padding: 1.1rem 0;
+      align-items: baseline;
+      border-bottom: 1px solid var(--line);
+      transition: background 0.4s, padding 0.3s;
+    }
+    .legend-item.flash {
+      background: rgba(255,255,255,0.04);
+      padding-left: 0.75rem;
+    }
+    .leg-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+    .leg-color {
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 50%;
+      align-self: center;
+    }
+    .leg-label {
+      font-size: clamp(0.875rem, 1.4vw, 1rem);
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.4;
+    }
+    .leg-count {
+      font-family: 'Instrument Serif', 'Noto Serif JP', serif;
+      font-size: clamp(1.5rem, 3vw, 2.25rem);
+      color: var(--text);
+      line-height: 0.9;
+      min-width: 2.5rem;
+      text-align: right;
+    }
+    .leg-pct {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      min-width: 3.5rem;
+      text-align: right;
+      letter-spacing: 0.05em;
+    }
+
+    /* WAITING OVERLAY */
+    #waiting {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      padding: 2rem;
+    }
+    #waiting::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1, 0 0 0 0 1, 0 0 0 0 1, 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.06;
+      pointer-events: none;
+      mix-blend-mode: overlay;
+    }
+    #waiting > * { position: relative; z-index: 1; }
+    .w-mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .w-mono::before {
+      content: '';
+      width: 2.5rem;
+      height: 1px;
+      background: var(--text-dim);
+    }
+    .w-headline {
+      font-size: clamp(2.5rem, 8vw, 6rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .w-headline .it {
+      font-family: 'Instrument Serif', 'Noto Serif JP', serif;
+      font-style: italic;
+      color: var(--accent);
+      font-weight: 400;
+    }
+    .w-sub {
+      color: var(--text-dim);
+      text-align: center;
+      max-width: 460px;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+    .dots {
+      display: inline-flex;
+      gap: 0.45rem;
+    }
+    .dots span {
+      width: 0.45rem;
+      height: 0.45rem;
+      background: var(--text-dim);
+      border-radius: 50%;
+      animation: dotPulse 1.4s infinite;
+    }
+    .dots span:nth-child(2) { animation-delay: 0.18s; }
+    .dots span:nth-child(3) { animation-delay: 0.36s; }
+    @keyframes dotPulse {
+      0%,100% { opacity: 0.25; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+  </style>
+</head>
+<body>
+  <div id="waiting">
+    <div class="w-mono">SURVEY.SYS / STATUS</div>
+    <div class="w-headline">Awaiting<br><span class="it">deployment.</span></div>
+    <div class="w-sub">進行役がアンケートを開始すると、ライブ結果がここに表示されます。</div>
+    <div class="dots"><span></span><span></span><span></span></div>
+  </div>
+
+  <header>
+    <div class="brand">RESULTS.SYS<span class="v">v1.0</span></div>
+    <div class="header-right">
+      <span class="live-mark off" id="live-mark">STANDBY</span>
+      <span class="total-pill">TOTAL <span id="total-num">0</span></span>
+      <button class="btn-fs" id="btn-fs">⛶ FULLSCREEN</button>
+    </div>
+  </header>
+
+  <div class="q-bar">
+    <div class="q-kicker" id="q-kicker">QUERY</div>
+    <div class="q-text" id="q-text">—</div>
+  </div>
+
+  <div class="main">
+    <div class="chart-area">
+      <div class="chart-wrap">
+        <canvas id="chart"></canvas>
+        <div class="chart-center">
+          <div class="center-num" id="center-num">0</div>
+          <div class="center-label">RESPONSES</div>
+        </div>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <script>
+    const COLORS = [
+      '#FF5C00','#C5FF36','#36B5FF','#FF36B5',
+      '#FFE036','#9D4EDD','#06D6A0','#FF364D'
+    ];
+
+    let chart = null;
+    let currentSurvey = null;
+    let lastTotal = 0;
+    let lastPollJSON = null;
+
+    const ctx = document.getElementById('chart').getContext('2d');
+
+    function buildChart(labels, data, total) {
+      const has = total > 0;
+      const bgColors = has ? COLORS.slice(0, labels.length) : labels.map(() => '#1F1F1F');
+      const cData = has ? data : labels.map(() => 1);
+
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [{
+            data: cData,
+            backgroundColor: bgColors,
+            borderColor: '#0A0A0A',
+            borderWidth: 4,
+            hoverOffset: 12,
+            hoverBorderColor: '#0A0A0A'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          cutout: '72%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#141414',
+              borderColor: 'rgba(255,255,255,0.18)',
+              borderWidth: 1,
+              titleColor: '#EAEAEA',
+              titleFont: { family: 'Inter, sans-serif', weight: '600' },
+              bodyColor: '#EAEAEA',
+              bodyFont: { family: 'JetBrains Mono, monospace', size: 12 },
+              padding: 12,
+              cornerRadius: 0,
+              displayColors: false,
+              callbacks: {
+                label: (c) => {
+                  if (!has) return '0 / 0%';
+                  const t = c.dataset.data.reduce((a, b) => a + b, 0);
+                  const pct = t > 0 ? Math.round(c.raw / t * 100) : 0;
+                  return ` ${c.raw} RESP / ${pct}%`;
+                }
+              }
+            }
+          },
+          animation: { duration: 800, easing: 'easeInOutQuart' }
+        }
+      });
+    }
+
+    function animateNumber(el, from, to, dur = 500) {
+      const start = performance.now();
+      function step(now) {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = Math.round(from + (to - from) * eased);
+        if (t < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    function updateUI(survey) {
+      const labels = survey.options;
+      const votes = survey.votes;
+      const data = labels.map(l => votes[l] || 0);
+      const total = data.reduce((a, b) => a + b, 0);
+
+      document.getElementById('q-text').textContent = survey.question;
+      const totalEl = document.getElementById('total-num');
+      const centerEl = document.getElementById('center-num');
+      animateNumber(totalEl, lastTotal, total);
+      animateNumber(centerEl, lastTotal, total);
+      lastTotal = total;
+
+      if (!chart) {
+        buildChart(labels, data, total);
+      } else {
+        const has = total > 0;
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = has ? data : labels.map(() => 1);
+        chart.data.datasets[0].backgroundColor = has
+          ? COLORS.slice(0, labels.length)
+          : labels.map(() => '#1F1F1F');
+        chart.update();
+      }
+
+      const legend = document.getElementById('legend');
+      legend.innerHTML = labels.map((lbl, i) => {
+        const v = votes[lbl] || 0;
+        const pct = total > 0 ? Math.round(v / total * 100) : 0;
+        return `<div class="legend-item" data-idx="${i}">
+          <span class="leg-num">${String(i + 1).padStart(2, '0')}</span>
+          <span class="leg-color" style="background:${COLORS[i]}"></span>
+          <span class="leg-label">${esc(lbl)}</span>
+          <span class="leg-count">${v}</span>
+          <span class="leg-pct">${pct}%</span>
+        </div>`;
+      }).join('');
+    }
+
+    function setStatus(active) {
+      const m = document.getElementById('live-mark');
+      m.classList.toggle('off', !active);
+      m.textContent = active ? 'LIVE' : 'PAUSED';
+    }
+
+    async function pollSurvey() {
+      try {
+        const res = await fetch('/api/survey');
+        const data = await res.json();
+        const json = JSON.stringify(data);
+        if (json === lastPollJSON) return;
+        const prevVotes = currentSurvey?.votes;
+        lastPollJSON = json;
+        currentSurvey = data;
+        setStatus(data.active);
+        const overlay = document.getElementById('waiting');
+        if (data.question) {
+          overlay.style.display = 'none';
+          updateUI(data);
+          // flash items that gained votes
+          if (prevVotes) {
+            data.options.forEach((lbl, i) => {
+              if ((data.votes[lbl] || 0) > (prevVotes[lbl] || 0)) {
+                const item = document.querySelector(`.legend-item[data-idx="${i}"]`);
+                if (item) {
+                  item.classList.add('flash');
+                  setTimeout(() => item.classList.remove('flash'), 900);
+                }
+              }
+            });
+          }
+        } else {
+          overlay.style.display = 'flex';
+        }
+      } catch (e) {}
+    }
+    setInterval(pollSurvey, 2000);
+    pollSurvey();
+
+    document.getElementById('btn-fs').addEventListener('click', () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    });
+
+    function esc(s) {
+      const d = document.createElement('div');
+      d.textContent = s ?? '';
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>

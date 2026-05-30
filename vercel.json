@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/admin.html",   "destination": "/public/admin.html" },
+    { "source": "/vote.html",    "destination": "/public/vote.html" },
+    { "source": "/results.html", "destination": "/public/results.html" },
+    { "source": "/",             "destination": "/public/admin.html" }
+  ]
+}
