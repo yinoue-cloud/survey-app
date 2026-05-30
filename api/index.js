@@ -29,7 +29,8 @@ function cleanInput(body) {
   const title = String((body || {}).title || '').trim();
   const question = String((body || {}).question || '').trim();
   const options = ((body || {}).options || []).map(o => String(o).trim()).filter(Boolean);
-  return { title, question, options };
+  const mode = (body || {}).mode === 'multiple' ? 'multiple' : 'single';
+  return { title, question, options, mode };
 }
 
 module.exports = async function handler(req, res) {
@@ -53,14 +54,14 @@ module.exports = async function handler(req, res) {
 
     // POST /api/surveys
     if (route === 'surveys' && method === 'POST') {
-      const { title, question, options } = cleanInput(req.body);
+      const { title, question, options, mode } = cleanInput(req.body);
       if (!title || !question || options.length < 2) {
         return res.status(400).json({ error: 'タイトル・質問・2つ以上の選択肢が必要です' });
       }
       const state = await getState();
       const survey = {
         id: newId(),
-        title, question, options,
+        title, question, mode, options,
         votes: Object.fromEntries(options.map(o => [o, 0])),
         createdAt: Date.now()
       };
@@ -73,7 +74,7 @@ module.exports = async function handler(req, res) {
     const m1 = route.match(/^surveys\/([^/]+)$/);
     if (m1 && method === 'PUT') {
       const id = m1[1];
-      const { title, question, options } = cleanInput(req.body);
+      const { title, question, options, mode } = cleanInput(req.body);
       if (!title || !question || options.length < 2) {
         return res.status(400).json({ error: 'タイトル・質問・2つ以上の選択肢が必要です' });
       }
@@ -83,7 +84,7 @@ module.exports = async function handler(req, res) {
       const prevVotes = state.surveys[idx].votes || {};
       state.surveys[idx] = {
         ...state.surveys[idx],
-        title, question, options,
+        title, question, mode, options,
         votes: Object.fromEntries(options.map(o => [o, prevVotes[o] || 0]))
       };
       await setState(state);
@@ -141,9 +142,9 @@ module.exports = async function handler(req, res) {
       return res.status(200).json(survey);
     }
 
-    // POST /api/vote
+    // POST /api/vote — accepts { option: string } or { options: string[] }
     if (route === 'vote' && method === 'POST') {
-      const { option } = req.body || {};
+      const body = req.body || {};
       const state = await getState();
       if (!state.activeSurveyId) {
         return res.status(400).json({ error: 'アンケートは現在受付中ではありません' });
@@ -152,10 +153,18 @@ module.exports = async function handler(req, res) {
       if (!survey) {
         return res.status(400).json({ error: 'アンケートが見つかりません' });
       }
-      if (typeof option !== 'string' || !(option in survey.votes)) {
-        return res.status(400).json({ error: '無効な選択肢です' });
+      const mode = survey.mode || 'single';
+      let picks = [];
+      if (Array.isArray(body.options)) picks = body.options;
+      else if (typeof body.option === 'string') picks = [body.option];
+      picks = [...new Set(picks.filter(o => typeof o === 'string' && o in survey.votes))];
+      if (picks.length === 0) {
+        return res.status(400).json({ error: '有効な選択肢を1つ以上選んでください' });
       }
-      survey.votes[option]++;
+      if (mode === 'single' && picks.length > 1) {
+        return res.status(400).json({ error: '単一選択のアンケートです' });
+      }
+      picks.forEach(o => { survey.votes[o]++; });
       await setState(state);
       return res.status(200).json({ success: true });
     }

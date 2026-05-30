@@ -126,7 +126,7 @@
     .options { list-style: none; }
     .opt-item {
       display: grid;
-      grid-template-columns: 3.5rem 1fr 2rem;
+      grid-template-columns: 3.5rem 1.4rem 1fr;
       gap: 1rem;
       align-items: center;
       padding: 1.5rem 0;
@@ -149,10 +149,81 @@
     }
     .opt-item:hover { padding-left: 1.5rem; }
     .opt-item:hover::before { width: 100%; }
-    .opt-item:hover .opt-num,
-    .opt-item:hover .opt-arrow { color: var(--accent); }
-    .opt-item:hover .opt-arrow { transform: translateX(6px); }
+    .opt-item:hover .opt-num { color: var(--accent); }
     .opt-item > * { position: relative; z-index: 1; }
+    .opt-check {
+      width: 1.4rem;
+      height: 1.4rem;
+      border: 1.5px solid var(--text-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .opt-check.is-radio { border-radius: 50%; }
+    .opt-item.is-selected .opt-check {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+    .opt-item.is-selected .opt-check::after {
+      content: '';
+      width: 0.7rem;
+      height: 0.7rem;
+      background: var(--bg);
+      border-radius: inherit;
+    }
+    .opt-item.is-selected .opt-check.is-radio::after { border-radius: 50%; }
+    .opt-item.is-selected { padding-left: 1.5rem; }
+    .opt-item.is-selected::before { width: 100%; }
+    .opt-item.is-selected .opt-num { color: var(--accent); }
+
+    /* SUBMIT BUTTON */
+    .submit-row {
+      margin-top: 2.5rem;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .btn-submit {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      padding: 1.25rem 2.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-submit:hover:not(:disabled) {
+      box-shadow: 0 0 40px rgba(255,92,0,0.4);
+      transform: translateY(-2px);
+    }
+    .btn-submit:disabled {
+      background: transparent;
+      border: 1px solid var(--line-strong);
+      color: var(--text-faint);
+      cursor: not-allowed;
+    }
+    .selection-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .selection-count { color: var(--accent); font-weight: 700; }
 
     .opt-num {
       font-family: 'JetBrains Mono', monospace;
@@ -298,7 +369,8 @@
     let survey = null;
     let surveyId = null;
     let hasVoted = false;
-    let votedOption = null;
+    let votedPicks = [];
+    let selections = new Set();
     const main = document.getElementById('main');
     const statusMark = document.getElementById('status-mark');
 
@@ -311,7 +383,8 @@
         if (changed) {
           surveyId = incomingId;
           hasVoted = false;
-          votedOption = null;
+          votedPicks = [];
+          selections = new Set();
         }
         survey = data;
         render();
@@ -320,17 +393,21 @@
     setInterval(pollSurvey, 3000);
     pollSurvey();
 
-    async function vote(option) {
-      const res = await fetch('/api/vote', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ option })
-      });
-      if (res.ok) {
-        hasVoted = true;
-        votedOption = option;
-        render();
-      }
+    async function submitVote() {
+      if (selections.size === 0) return;
+      const options = Array.from(selections);
+      try {
+        const res = await fetch('/api/vote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ options })
+        });
+        if (res.ok) {
+          hasVoted = true;
+          votedPicks = options;
+          render();
+        }
+      } catch (e) {}
     }
 
     function setStatus(active) {
@@ -338,16 +415,38 @@
       statusMark.textContent = active ? 'LIVE' : 'STANDBY';
     }
 
+    function toggleSelection(opt, mode) {
+      if (mode === 'single') {
+        selections = selections.has(opt) ? new Set() : new Set([opt]);
+      } else {
+        if (selections.has(opt)) selections.delete(opt);
+        else selections.add(opt);
+      }
+      updateSelectionUI();
+    }
+
+    function updateSelectionUI() {
+      document.querySelectorAll('.opt-item').forEach(li => {
+        const opt = li.dataset.opt;
+        li.classList.toggle('is-selected', selections.has(opt));
+      });
+      const btn = document.getElementById('btn-submit');
+      const cnt = document.getElementById('sel-count');
+      if (btn) btn.disabled = selections.size === 0;
+      if (cnt) cnt.textContent = selections.size;
+    }
+
     function render() {
       const isActive = !!(survey && survey.question);
       setStatus(isActive);
 
       if (hasVoted) {
+        const list = votedPicks.map(o => `<div class="ty-tag"><span class="lbl">YOUR ANSWER</span>${esc(o)}</div>`).join('');
         main.innerHTML = `
           <div class="state-wrap">
             <div class="ty-mono">RESPONSE RECORDED</div>
             <div class="ty-headline">Thank <span class="it">you.</span></div>
-            <div class="ty-tag"><span class="lbl">YOUR ANSWER</span>${esc(votedOption)}</div>
+            ${list}
           </div>
         `;
         return;
@@ -365,26 +464,41 @@
         return;
       }
 
+      const mode = survey.mode || 'single';
+      const kickerText = mode === 'multiple' ? 'QUESTION / SELECT ANY' : 'QUESTION / SELECT ONE';
+      const instr = mode === 'multiple' ? '↓ 該当するものを全て選択して送信' : '↓ ひとつ選択して送信';
+      const checkClass = mode === 'multiple' ? '' : 'is-radio';
+
       main.innerHTML = `
-        <div class="kicker">QUESTION / SELECT ONE</div>
+        <div class="kicker">${kickerText}</div>
         <h1 class="question">${esc(survey.question)}</h1>
-        <div class="instruction">↓ TAP YOUR ANSWER BELOW</div>
+        <div class="instruction">${instr}</div>
         <ul class="options" id="opts"></ul>
+        <div class="selection-meta">
+          <span><span class="selection-count" id="sel-count">0</span> / ${survey.options.length} selected</span>
+          <span>${mode === 'multiple' ? 'MULTI MODE' : 'SINGLE MODE'}</span>
+        </div>
+        <div class="submit-row">
+          <button class="btn-submit" id="btn-submit" disabled>SUBMIT <span>→</span></button>
+        </div>
       `;
 
       const opts = document.getElementById('opts');
       survey.options.forEach((opt, i) => {
         const li = document.createElement('li');
         li.className = 'opt-item';
+        li.dataset.opt = opt;
         li.innerHTML = `
           <span class="opt-num">${String(i + 1).padStart(2, '0')}</span>
+          <span class="opt-check ${checkClass}"></span>
           <span class="opt-text"></span>
-          <span class="opt-arrow">→</span>
         `;
         li.querySelector('.opt-text').textContent = opt;
-        li.addEventListener('click', () => vote(survey.options[i]));
+        li.addEventListener('click', () => toggleSelection(opt, mode));
         opts.appendChild(li);
       });
+      document.getElementById('btn-submit').addEventListener('click', submitVote);
+      updateSelectionUI();
     }
 
     function esc(s) {

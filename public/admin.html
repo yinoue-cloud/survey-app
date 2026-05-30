@@ -213,6 +213,15 @@
       padding-top: 0.5rem;
       border-top: 1px solid var(--line);
     }
+    .card-mode {
+      display: inline-block;
+      color: var(--text);
+      border: 1px solid var(--line-strong);
+      padding: 0.15rem 0.5rem;
+      margin-right: 0.5rem;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+    }
     .card-actions {
       display: flex;
       gap: 0.5rem;
@@ -332,6 +341,48 @@
       transition: all 0.2s;
     }
     .btn-add:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* MODE TOGGLE */
+    .mode-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      max-width: 480px;
+    }
+    .mode-opt {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.4rem;
+      padding: 1.1rem 1.25rem;
+      background: transparent;
+      border: 1px solid var(--line-strong);
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+    .mode-opt:hover { border-color: var(--text); color: var(--text); }
+    .mode-opt.is-on {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(255, 92, 0, 0.06);
+    }
+    .mode-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .mode-sub {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--text-dim);
+    }
+    .mode-opt.is-on .mode-sub { color: var(--accent); opacity: 0.85; }
 
     /* BUTTONS */
     .cta-row { display: flex; gap: 0.875rem; flex-wrap: wrap; margin-top: 2rem; }
@@ -513,6 +564,20 @@
       </div>
 
       <div class="form-block">
+        <div class="field-meta">MODE</div>
+        <div class="mode-toggle" id="mode-toggle">
+          <button type="button" class="mode-opt is-on" data-mode="single">
+            <span class="mode-label">SINGLE</span>
+            <span class="mode-sub">単一選択</span>
+          </button>
+          <button type="button" class="mode-opt" data-mode="multiple">
+            <span class="mode-label">MULTIPLE</span>
+            <span class="mode-sub">複数選択可</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-block">
         <div class="field-meta">OPTIONS — 最低2つ</div>
         <div id="options-list"></div>
         <button type="button" id="btn-add" class="btn-add">+ ADD OPTION</button>
@@ -548,7 +613,19 @@
     let state = { surveys: [], activeSurveyId: null };
     let editingId = null;
     let formOptions = ['', ''];
+    let formMode = 'single';
     let pollTimer = null;
+
+    /* ---------- MODE TOGGLE ---------- */
+    function setFormMode(mode) {
+      formMode = mode === 'multiple' ? 'multiple' : 'single';
+      document.querySelectorAll('.mode-opt').forEach(b => {
+        b.classList.toggle('is-on', b.dataset.mode === formMode);
+      });
+    }
+    document.querySelectorAll('.mode-opt').forEach(b => {
+      b.addEventListener('click', () => setFormMode(b.dataset.mode));
+    });
 
     /* ---------- TOAST ---------- */
     let toastTimer = null;
@@ -594,6 +671,8 @@
         const isActive = s.id === state.activeSurveyId;
         const total = totalVotes(s);
         const opts = s.options.map((o, i) => `${i + 1}. ${escapeHTML(o)}`).join('  ·  ');
+        const mode = s.mode || 'single';
+        const modeBadge = `<span class="card-mode">${mode === 'multiple' ? '☰ MULTI' : '○ SINGLE'}</span>`;
         const actBtn = isActive
           ? `<button class="act-deactivate" data-act="deactivate">■ STOP</button>`
           : `<button class="act-activate" data-act="activate">▶ ACTIVATE</button>`;
@@ -605,7 +684,7 @@
             </div>
             <div class="card-title">${escapeHTML(s.title)}</div>
             <div class="card-question">${escapeHTML(s.question)}</div>
-            <div class="card-opts">${opts}</div>
+            <div class="card-opts">${modeBadge}${opts}</div>
             <div class="card-actions">
               ${actBtn}
               <button data-act="edit">EDIT</button>
@@ -715,6 +794,7 @@
       $('#f-title').value = s ? s.title : '';
       $('#f-question').value = s ? s.question : '';
       formOptions = s ? s.options.slice() : ['', ''];
+      setFormMode(s ? (s.mode || 'single') : 'single');
       $('#form-mode').textContent = id ? 'EDIT SURVEY' : 'NEW SURVEY';
       $('#form-heading').textContent = id ? 'EDIT' : 'CREATE';
       renderOptions();
@@ -740,10 +820,10 @@
       if (options.length < 2) return toast('選択肢は2つ以上', 'error');
       try {
         if (editingId) {
-          await api('surveys/' + editingId, { method: 'PUT', body: { title, question, options } });
+          await api('surveys/' + editingId, { method: 'PUT', body: { title, question, options, mode: formMode } });
           toast('UPDATED', 'success');
         } else {
-          await api('surveys', { method: 'POST', body: { title, question, options } });
+          await api('surveys', { method: 'POST', body: { title, question, options, mode: formMode } });
           toast('CREATED', 'success');
         }
         closeForm();
