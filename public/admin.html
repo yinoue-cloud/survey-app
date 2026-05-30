@@ -368,16 +368,41 @@
     }
     .btn-sec:hover { border-color: var(--text); }
 
-    /* COPY FAB */
-    .copy-fab {
+    /* BOTTOM DOCK */
+    .bottom-dock {
       position: fixed;
-      bottom: 2rem;
+      bottom: 1.5rem;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
+      gap: 0.6rem;
+      align-items: stretch;
+      z-index: 100;
+    }
+    .dock-link {
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      color: var(--text-dim);
+      padding: 0 1.25rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.2s;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .dock-link:hover { color: var(--text); border-color: var(--text); }
+    .copy-fab {
+      display: flex;
       align-items: center;
       gap: 0.75rem;
-      padding: 1rem 2rem;
+      padding: 1rem 1.75rem;
       background: var(--surface);
       border: 1px solid var(--line-strong);
       color: var(--text-dim);
@@ -388,7 +413,6 @@
       text-transform: uppercase;
       cursor: pointer;
       transition: all 0.3s;
-      z-index: 100;
       white-space: nowrap;
     }
     .copy-fab:hover { border-color: var(--text); color: var(--text); }
@@ -434,20 +458,18 @@
 
     @media (max-width: 720px) {
       .hero { padding: 3rem 1.5rem 2rem; }
-      .container { padding: 0 1.5rem 4rem; }
+      .container { padding: 0 1.5rem 7rem; }
       header { padding: 1rem 1.5rem; }
-      .header-right { gap: 1rem; }
       .cards-grid { grid-template-columns: 1fr; }
+      .bottom-dock { gap: 0.4rem; bottom: 1rem; }
+      .dock-link { padding: 0 0.75rem; font-size: 0.65rem; }
+      .copy-fab { padding: 0.85rem 1rem; font-size: 0.68rem; }
     }
   </style>
 </head>
 <body>
   <header>
     <div class="brand">SURVEY.SYS<span class="v">v2.0</span></div>
-    <div class="header-right">
-      <a class="nav-link" href="vote.html" target="_blank">VOTE<span class="arr">↗</span></a>
-      <a class="nav-link" href="results.html" target="_blank">RESULTS<span class="arr">↗</span></a>
-    </div>
   </header>
 
   <section class="hero">
@@ -503,11 +525,15 @@
     </div>
   </div>
 
-  <button class="copy-fab" id="copy-fab">
-    <span class="fab-dot"></span>
-    <span id="fab-label">COPY VOTE URL</span>
-    <span>⎘</span>
-  </button>
+  <div class="bottom-dock">
+    <a href="vote.html" target="_blank" class="dock-link">VOTE <span>↗</span></a>
+    <a href="results.html" target="_blank" class="dock-link">RESULTS <span>↗</span></a>
+    <button class="copy-fab" id="copy-fab">
+      <span class="fab-dot"></span>
+      <span id="fab-label">COPY VOTE URL</span>
+      <span>⎘</span>
+    </button>
+  </div>
 
   <div class="toast" id="toast"></div>
 
