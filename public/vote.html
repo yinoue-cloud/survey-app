@@ -296,6 +296,7 @@
 
   <script>
     let survey = null;
+    let surveyId = null;
     let hasVoted = false;
     let votedOption = null;
     const main = document.getElementById('main');
@@ -303,18 +304,17 @@
 
     async function pollSurvey() {
       try {
-        const res = await fetch('/api/survey');
+        const res = await fetch('/api/active');
         const data = await res.json();
-        const prev = survey?.version;
-        const changed = data.version !== survey?.version || data.active !== survey?.active;
+        const incomingId = data ? data.id : null;
+        const changed = incomingId !== surveyId;
         if (changed) {
-          if (prev !== undefined && data.version !== prev) {
-            hasVoted = false;
-            votedOption = null;
-          }
-          survey = data;
-          render();
+          surveyId = incomingId;
+          hasVoted = false;
+          votedOption = null;
         }
+        survey = data;
+        render();
       } catch (e) {}
     }
     setInterval(pollSurvey, 3000);
@@ -339,7 +339,8 @@
     }
 
     function render() {
-      setStatus(!!survey?.active);
+      const isActive = !!(survey && survey.question);
+      setStatus(isActive);
 
       if (hasVoted) {
         main.innerHTML = `
@@ -352,7 +353,7 @@
         return;
       }
 
-      if (!survey?.active || !survey?.question) {
+      if (!isActive) {
         main.innerHTML = `
           <div class="state-wrap">
             <div class="state-mono">STATUS / AWAITING DEPLOYMENT</div>
@@ -391,11 +392,6 @@
       d.textContent = s ?? '';
       return d.innerHTML;
     }
-
-    fetch('/api/survey').then(r => r.json()).then(data => {
-      survey = data;
-      render();
-    });
   </script>
 </body>
 </html>

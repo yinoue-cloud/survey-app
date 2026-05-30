@@ -439,6 +439,7 @@
       const data = labels.map(l => votes[l] || 0);
       const total = data.reduce((a, b) => a + b, 0);
 
+      document.getElementById('q-kicker').textContent = survey.title || 'QUERY';
       document.getElementById('q-text').textContent = survey.question;
       const totalEl = document.getElementById('total-num');
       const centerEl = document.getElementById('center-num');
@@ -480,20 +481,28 @@
 
     async function pollSurvey() {
       try {
-        const res = await fetch('/api/survey');
+        const res = await fetch('/api/active');
         const data = await res.json();
         const json = JSON.stringify(data);
         if (json === lastPollJSON) return;
+        const prevSurveyId = currentSurvey?.id;
         const prevVotes = currentSurvey?.votes;
         lastPollJSON = json;
         currentSurvey = data;
-        setStatus(data.active);
+        const isActive = !!(data && data.question);
+        setStatus(isActive);
         const overlay = document.getElementById('waiting');
-        if (data.question) {
+        if (isActive) {
           overlay.style.display = 'none';
+          // rebuild chart from scratch when switching to a different survey
+          if (chart && prevSurveyId !== data.id) {
+            chart.destroy();
+            chart = null;
+            lastTotal = 0;
+          }
           updateUI(data);
           // flash items that gained votes
-          if (prevVotes) {
+          if (prevVotes && prevSurveyId === data.id) {
             data.options.forEach((lbl, i) => {
               if ((data.votes[lbl] || 0) > (prevVotes[lbl] || 0)) {
                 const item = document.querySelector(`.legend-item[data-idx="${i}"]`);
@@ -506,6 +515,12 @@
           }
         } else {
           overlay.style.display = 'flex';
+          if (chart) { chart.destroy(); chart = null; lastTotal = 0; }
+          document.getElementById('q-kicker').textContent = 'QUERY';
+          document.getElementById('q-text').textContent = '—';
+          document.getElementById('total-num').textContent = '0';
+          document.getElementById('center-num').textContent = '0';
+          document.getElementById('legend').innerHTML = '';
         }
       } catch (e) {}
     }

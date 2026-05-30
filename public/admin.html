@@ -11,6 +11,7 @@
     :root {
       --bg: #0A0A0A;
       --surface: #141414;
+      --surface-2: #1A1A1A;
       --line: rgba(255,255,255,0.08);
       --line-strong: rgba(255,255,255,0.18);
       --text: #EAEAEA;
@@ -73,7 +74,7 @@
 
     /* HERO */
     .hero {
-      padding: 5rem 2.5rem 4rem;
+      padding: 4rem 2.5rem 3rem;
       max-width: 1240px;
       margin: 0 auto;
     }
@@ -86,7 +87,7 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      margin-bottom: 1.75rem;
+      margin-bottom: 1.5rem;
     }
     .kicker::before {
       content: '';
@@ -95,11 +96,11 @@
       background: var(--text-dim);
     }
     .hero h1 {
-      font-size: clamp(3rem, 9vw, 7.5rem);
+      font-size: clamp(2.5rem, 7vw, 6rem);
       font-weight: 900;
       line-height: 0.92;
       letter-spacing: -0.045em;
-      margin-bottom: 1.75rem;
+      margin-bottom: 1.5rem;
     }
     .hero h1 .it {
       color: var(--accent);
@@ -118,38 +119,160 @@
     /* CONTAINER */
     .container { max-width: 1240px; margin: 0 auto; padding: 0 2.5rem 6rem; }
 
-    .step {
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1rem;
       border-top: 1px solid var(--line);
-      padding: 3rem 0;
+      padding-top: 2.5rem;
+      padding-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .section-head h2 {
+      font-size: clamp(1.5rem, 3vw, 2.25rem);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1;
+    }
+    .section-head .kicker { margin-bottom: 0.75rem; }
+
+    /* CARDS GRID */
+    .cards-grid {
       display: grid;
-      grid-template-columns: 220px 1fr;
-      gap: 3rem;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
     }
-    @media (max-width: 720px) {
-      .step { grid-template-columns: 1fr; gap: 1.25rem; }
-      .hero { padding: 3rem 1.5rem 2rem; }
-      .container { padding: 0 1.5rem 4rem; }
-      header { padding: 1rem 1.5rem; }
-      .header-right { gap: 1rem; }
+    .card {
+      background: var(--surface);
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      min-height: 280px;
+      transition: background 0.2s;
     }
-    .step-meta {
+    .card.is-active {
+      background: var(--surface-2);
+      box-shadow: inset 3px 0 0 var(--live);
+    }
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .card-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-dim);
+    }
+    .card-status .dot {
+      width: 0.5rem; height: 0.5rem; border-radius: 50%;
+      background: var(--text-faint);
+    }
+    .card.is-active .card-status { color: var(--live); }
+    .card.is-active .card-status .dot {
+      background: var(--live);
+      box-shadow: 0 0 10px var(--live);
+      animation: lp 1.5s infinite;
+    }
+    @keyframes lp { 0%,100%{opacity:1} 50%{opacity:0.35} }
+    .card-votes { color: var(--text); font-weight: 700; }
+    .card-votes .num {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.4rem;
+      color: var(--accent);
+      margin-right: 0.3rem;
+      font-weight: 400;
+    }
+    .card-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+    .card-question {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      flex: 1;
+    }
+    .card-opts {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+      line-height: 1.6;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--line);
+    }
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .card-actions button {
+      background: transparent;
+      border: 1px solid var(--line-strong);
+      color: var(--text);
+      padding: 0.55rem 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .card-actions button:hover { border-color: var(--text); }
+    .card-actions .act-activate {
+      background: var(--live);
+      color: var(--bg);
+      border-color: var(--live);
+      font-weight: 700;
+    }
+    .card-actions .act-activate:hover { box-shadow: 0 0 25px var(--live-glow); }
+    .card-actions .act-deactivate {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+    .card-actions .act-deactivate:hover { box-shadow: 0 0 25px var(--accent-glow); }
+    .card-actions .act-delete:hover { border-color: var(--accent); color: var(--accent); }
+
+    .empty-state {
+      padding: 5rem 1rem;
+      text-align: center;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      border: 1px dashed var(--line-strong);
+    }
+
+    /* FORM */
+    .form-block {
+      border-top: 1px solid var(--line);
+      padding: 2rem 0;
+    }
+    .field-meta {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.72rem;
       letter-spacing: 0.12em;
       color: var(--text-dim);
       text-transform: uppercase;
+      margin-bottom: 1rem;
     }
-    .step-num {
-      font-size: 2.5rem;
-      color: var(--text);
-      font-family: 'Instrument Serif', serif;
-      font-weight: 400;
-      line-height: 1;
-      margin-bottom: 0.4rem;
-    }
-    .step-content { width: 100%; min-width: 0; }
-
-    /* INPUTS */
     textarea, input[type="text"] {
       width: 100%;
       background: transparent;
@@ -167,7 +290,6 @@
     textarea:focus, input:focus { outline: none; border-bottom-color: var(--accent); }
     textarea::placeholder, input::placeholder { color: var(--text-faint); }
 
-    /* OPTIONS */
     .opt-row {
       display: grid;
       grid-template-columns: 3rem 1fr 2.5rem;
@@ -195,7 +317,6 @@
     }
     .btn-remove:hover:not(:disabled) { color: var(--accent); }
     .btn-remove:disabled { opacity: 0.25; cursor: not-allowed; }
-
     .btn-add {
       margin-top: 1.5rem;
       background: transparent;
@@ -212,8 +333,8 @@
     }
     .btn-add:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* CTA */
-    .cta-row { display: flex; gap: 0.875rem; flex-wrap: wrap; }
+    /* BUTTONS */
+    .cta-row { display: flex; gap: 0.875rem; flex-wrap: wrap; margin-top: 2rem; }
     .btn-cta {
       display: inline-flex;
       align-items: center;
@@ -232,7 +353,6 @@
     }
     .btn-cta:hover { box-shadow: 0 0 40px var(--accent-glow); transform: translateY(-2px); }
     .btn-cta .arr { font-size: 1.1rem; }
-
     .btn-sec {
       background: transparent;
       color: var(--text);
@@ -247,110 +367,6 @@
       transition: all 0.2s;
     }
     .btn-sec:hover { border-color: var(--text); }
-    .btn-sec.danger:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-sec.live-btn {
-      background: var(--live);
-      color: var(--bg);
-      border-color: var(--live);
-      font-weight: 700;
-    }
-    .btn-sec.live-btn:hover { box-shadow: 0 0 40px var(--live-glow); transform: translateY(-2px); }
-
-    /* STATUS CARD */
-    .status-card {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      padding: 2.5rem;
-    }
-    .status-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      padding: 0.5rem 0.875rem;
-      border: 1px solid var(--line-strong);
-    }
-    .status-pill.live { color: var(--live); border-color: var(--live); }
-    .status-pill.idle { color: var(--text-dim); }
-    .live-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--text-faint); }
-    .status-pill.live .live-dot {
-      background: var(--live);
-      box-shadow: 0 0 10px var(--live);
-      animation: lp 1.5s infinite;
-    }
-    @keyframes lp { 0%,100%{opacity:1} 50%{opacity:0.35} }
-    .status-total {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
-      color: var(--text-dim);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-    .status-total span { color: var(--text); font-weight: 700; font-size: 1.1rem; }
-    .status-q {
-      font-size: clamp(1.25rem, 2.5vw, 1.85rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1.3;
-      margin-bottom: 2rem;
-    }
-    .status-opts { list-style: none; }
-    .status-opts li {
-      display: grid;
-      grid-template-columns: 3rem 1fr auto;
-      gap: 1rem;
-      align-items: baseline;
-      padding: 1rem 0;
-      border-bottom: 1px solid var(--line);
-    }
-    .status-opts li:last-child { border-bottom: none; }
-    .opt-idx {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.72rem;
-      color: var(--text-dim);
-      letter-spacing: 0.05em;
-    }
-    .opt-text { color: var(--text); font-size: 0.95rem; }
-    .opt-vote {
-      font-family: 'Instrument Serif', serif;
-      font-size: 1.75rem;
-      color: var(--accent);
-      line-height: 1;
-    }
-    .opt-vote .small {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      color: var(--text-dim);
-      margin-left: 0.5rem;
-      letter-spacing: 0.05em;
-    }
-    .empty-state {
-      padding: 4rem 1rem;
-      text-align: center;
-      color: var(--text-dim);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-    }
-    .controls-row {
-      display: flex;
-      gap: 0.875rem;
-      flex-wrap: wrap;
-      margin-top: 2rem;
-    }
 
     /* TOAST */
     .toast {
@@ -374,11 +390,19 @@
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.success { border-color: var(--live); color: var(--live); box-shadow: 0 0 25px var(--live-glow); }
     .toast.error { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 25px var(--accent-glow); }
+
+    @media (max-width: 720px) {
+      .hero { padding: 3rem 1.5rem 2rem; }
+      .container { padding: 0 1.5rem 4rem; }
+      header { padding: 1rem 1.5rem; }
+      .header-right { gap: 1rem; }
+      .cards-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
   <header>
-    <div class="brand">SURVEY.SYS<span class="v">v1.0</span></div>
+    <div class="brand">SURVEY.SYS<span class="v">v2.0</span></div>
     <div class="header-right">
       <a class="nav-link" href="vote.html" target="_blank">VOTE<span class="arr">↗</span></a>
       <a class="nav-link" href="results.html" target="_blank">RESULTS<span class="arr">↗</span></a>
@@ -389,52 +413,52 @@
   <section class="hero">
     <div class="kicker">A REAL-TIME POLLING INTERFACE</div>
     <h1>SHAPE<br>THE <span class="it">room.</span></h1>
-    <p>研修やワークショップ向け、リアルタイムアンケート集計ツール。質問を設計し、回答を集め、シネマティックに可視化します。</p>
+    <p>事前にアンケートを設計して保存、当日アクティブ化して回答を集めます。シネマティックに可視化。</p>
   </section>
 
   <div class="container">
-    <div class="step">
-      <div class="step-meta">
-        <div class="step-num">01</div>
-        QUERY DESIGN
+    <!-- LIST VIEW -->
+    <div id="view-list">
+      <div class="section-head">
+        <div>
+          <div class="kicker">LIBRARY</div>
+          <h2>SAVED SURVEYS</h2>
+        </div>
+        <button id="btn-new" class="btn-cta">+ NEW SURVEY <span class="arr">→</span></button>
       </div>
-      <div class="step-content">
-        <textarea id="question" rows="2" placeholder="例：生成AIの利用状況を教えてください"></textarea>
-      </div>
+      <div id="cards-grid" class="cards-grid" style="display:none"></div>
+      <div id="empty" class="empty-state">NO SURVEYS YET — CLICK [+ NEW SURVEY]</div>
     </div>
 
-    <div class="step">
-      <div class="step-meta">
-        <div class="step-num">02</div>
-        RESPONSES
+    <!-- FORM VIEW -->
+    <div id="view-form" style="display:none">
+      <div class="section-head">
+        <div>
+          <div class="kicker" id="form-mode">NEW SURVEY</div>
+          <h2 id="form-heading">CREATE</h2>
+        </div>
+        <button id="btn-back" class="btn-sec">← BACK</button>
       </div>
-      <div class="step-content">
+
+      <div class="form-block">
+        <div class="field-meta">TITLE</div>
+        <input type="text" id="f-title" placeholder="例：午前セッションのアイスブレイク" maxlength="120">
+      </div>
+
+      <div class="form-block">
+        <div class="field-meta">QUESTION</div>
+        <textarea id="f-question" rows="3" placeholder="例：生成AIをどのくらい使っていますか？"></textarea>
+      </div>
+
+      <div class="form-block">
+        <div class="field-meta">OPTIONS — 最低2つ</div>
         <div id="options-list"></div>
-        <button class="btn-add" id="btn-add" type="button">+ ADD OPTION</button>
+        <button type="button" id="btn-add" class="btn-add">+ ADD OPTION</button>
       </div>
-    </div>
 
-    <div class="step">
-      <div class="step-meta">
-        <div class="step-num">03</div>
-        DEPLOY
-      </div>
-      <div class="step-content">
-        <div class="cta-row">
-          <button class="btn-cta" id="btn-create" type="button">CREATE / UPDATE <span class="arr">→</span></button>
-        </div>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-meta">
-        <div class="step-num">04</div>
-        LIVE STATUS
-      </div>
-      <div class="step-content">
-        <div class="status-card" id="status-card">
-          <div class="empty-state">// NO ACTIVE SURVEY</div>
-        </div>
+      <div class="cta-row">
+        <button id="btn-save" class="btn-cta">SAVE <span class="arr">→</span></button>
+        <button id="btn-cancel" class="btn-sec">CANCEL</button>
       </div>
     </div>
   </div>
@@ -442,164 +466,233 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    let currentSurvey = null;
-    let lastPollJSON = null;
-    let options = ['', '', ''];
+    const $ = (s) => document.querySelector(s);
+    const grid = $('#cards-grid');
+    const emptyEl = $('#empty');
+    const viewList = $('#view-list');
+    const viewForm = $('#view-form');
+    const toastEl = $('#toast');
 
-    const optionsList = document.getElementById('options-list');
-    const statusCard = document.getElementById('status-card');
-    const toast = document.getElementById('toast');
+    let state = { surveys: [], activeSurveyId: null };
+    let editingId = null;
+    let formOptions = ['', ''];
+    let pollTimer = null;
 
-    function syncFromDOM() {
-      const inputs = optionsList.querySelectorAll('input');
-      inputs.forEach((el, i) => { if (i < options.length) options[i] = el.value; });
+    /* ---------- TOAST ---------- */
+    let toastTimer = null;
+    function toast(msg, kind = '') {
+      toastEl.textContent = msg;
+      toastEl.className = 'toast show ' + kind;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toastEl.classList.remove('show'); }, 2400);
     }
 
-    function renderOptions() {
-      optionsList.innerHTML = '';
-      options.forEach((val, i) => {
-        const row = document.createElement('div');
-        row.className = 'opt-row';
-
-        const num = document.createElement('div');
-        num.className = 'opt-num';
-        num.textContent = String(i + 1).padStart(2, '0');
-
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = val;
-        input.placeholder = `Response ${String(i + 1).padStart(2, '0')}`;
-        input.addEventListener('input', () => { options[i] = input.value; });
-
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'btn-remove';
-        btn.textContent = '×';
-        btn.disabled = options.length <= 2;
-        btn.title = '削除';
-        btn.addEventListener('click', () => {
-          if (options.length <= 2) return;
-          syncFromDOM();
-          options.splice(i, 1);
-          renderOptions();
-        });
-
-        row.append(num, input, btn);
-        optionsList.appendChild(row);
-      });
-    }
-
-    document.getElementById('btn-add').addEventListener('click', () => {
-      syncFromDOM();
-      options.push('');
-      renderOptions();
-      const inputs = optionsList.querySelectorAll('input');
-      inputs[inputs.length - 1]?.focus();
-    });
-
-    document.getElementById('btn-create').addEventListener('click', async () => {
-      syncFromDOM();
-      const question = document.getElementById('question').value;
-      const res = await fetch('/api/survey', {
-        method: 'POST',
+    /* ---------- API ---------- */
+    async function api(path, opts = {}) {
+      const res = await fetch('/api/' + path, {
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, options })
+        ...opts,
+        body: opts.body ? JSON.stringify(opts.body) : undefined
       });
-      const data = await res.json();
-      if (!res.ok) { showToast(data.error || 'ERROR', 'error'); return; }
-      showToast('SURVEY DEPLOYED', 'success');
-    });
-
-    document.getElementById('btn-copy').addEventListener('click', () => {
-      navigator.clipboard.writeText(location.origin + '/vote.html')
-        .then(() => showToast('URL COPIED', 'success'))
-        .catch(() => showToast('COPY FAILED', 'error'));
-    });
-
-    async function activate(active) {
-      const res = await fetch('/api/survey/activate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ active })
-      });
-      const data = await res.json();
-      if (!res.ok) { showToast(data.error || 'ERROR', 'error'); return; }
-      showToast(active ? 'SURVEY LIVE' : 'SURVEY PAUSED', 'success');
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || 'リクエスト失敗');
+      return json;
     }
 
-    async function resetVotes() {
-      if (!confirm('集計データをリセットしますか？')) return;
-      await fetch('/api/survey/reset', { method: 'POST' });
-      showToast('RESET COMPLETE', 'success');
+    /* ---------- LIST RENDERING ---------- */
+    function totalVotes(s) {
+      return Object.values(s.votes || {}).reduce((a, b) => a + b, 0);
     }
-
-    async function pollSurvey() {
-      try {
-        const res = await fetch('/api/survey');
-        const data = await res.json();
-        const json = JSON.stringify(data);
-        if (json !== lastPollJSON) {
-          lastPollJSON = json;
-          currentSurvey = data;
-          renderStatus(data);
-        }
-      } catch (e) {}
+    function escapeHTML(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
     }
-    setInterval(pollSurvey, 3000);
-    pollSurvey();
-
-    function renderStatus(data) {
-      if (!data.question) {
-        statusCard.innerHTML = `<div class="empty-state">// NO ACTIVE SURVEY</div>`;
+    function renderList() {
+      const surveys = state.surveys || [];
+      if (!surveys.length) {
+        grid.style.display = 'none';
+        emptyEl.style.display = '';
         return;
       }
-      const total = Object.values(data.votes).reduce((a, b) => a + b, 0);
-      const pill = data.active
-        ? `<span class="status-pill live"><span class="live-dot"></span>LIVE</span>`
-        : `<span class="status-pill idle"><span class="live-dot"></span>PAUSED</span>`;
+      grid.style.display = '';
+      emptyEl.style.display = 'none';
 
-      statusCard.innerHTML = `
-        <div class="status-row">
-          ${pill}
-          <div class="status-total">TOTAL <span>${total}</span> RESPONSES</div>
+      grid.innerHTML = surveys.map(s => {
+        const isActive = s.id === state.activeSurveyId;
+        const total = totalVotes(s);
+        const opts = s.options.map((o, i) => `${i + 1}. ${escapeHTML(o)}`).join('  ·  ');
+        const actBtn = isActive
+          ? `<button class="act-deactivate" data-act="deactivate">■ STOP</button>`
+          : `<button class="act-activate" data-act="activate">▶ ACTIVATE</button>`;
+        return `
+          <div class="card ${isActive ? 'is-active' : ''}" data-id="${s.id}">
+            <div class="card-head">
+              <span class="card-status"><span class="dot"></span>${isActive ? 'ACTIVE' : 'IDLE'}</span>
+              <span class="card-votes"><span class="num">${total}</span>VOTES</span>
+            </div>
+            <div class="card-title">${escapeHTML(s.title)}</div>
+            <div class="card-question">${escapeHTML(s.question)}</div>
+            <div class="card-opts">${opts}</div>
+            <div class="card-actions">
+              ${actBtn}
+              <button data-act="edit">EDIT</button>
+              <button data-act="reset">RESET</button>
+              <button class="act-delete" data-act="delete">DELETE</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      grid.querySelectorAll('.card').forEach(card => {
+        const id = card.dataset.id;
+        card.querySelectorAll('[data-act]').forEach(btn => {
+          btn.addEventListener('click', () => handleCardAction(id, btn.dataset.act));
+        });
+      });
+    }
+
+    /* ---------- POLLING ---------- */
+    async function loadState() {
+      try {
+        state = await api('surveys');
+        if (viewList.style.display !== 'none') renderList();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    function startPoll() {
+      stopPoll();
+      pollTimer = setInterval(loadState, 3000);
+    }
+    function stopPoll() {
+      if (pollTimer) clearInterval(pollTimer);
+      pollTimer = null;
+    }
+
+    /* ---------- ACTIONS ---------- */
+    async function handleCardAction(id, act) {
+      try {
+        if (act === 'activate') {
+          await api('surveys/' + id + '/activate', { method: 'POST' });
+          toast('ACTIVATED', 'success');
+        } else if (act === 'deactivate') {
+          await api('surveys/deactivate', { method: 'POST' });
+          toast('STOPPED', 'success');
+        } else if (act === 'reset') {
+          if (!confirm('票数をリセットしますか？')) return;
+          await api('surveys/' + id + '/reset', { method: 'POST' });
+          toast('RESET', 'success');
+        } else if (act === 'delete') {
+          if (!confirm('このアンケートを削除しますか？')) return;
+          await api('surveys/' + id, { method: 'DELETE' });
+          toast('DELETED', 'success');
+        } else if (act === 'edit') {
+          openForm(id);
+          return;
+        }
+        await loadState();
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    /* ---------- FORM ---------- */
+    function renderOptions() {
+      const list = $('#options-list');
+      list.innerHTML = formOptions.map((v, i) => `
+        <div class="opt-row">
+          <span class="opt-num">${String(i + 1).padStart(2, '0')}</span>
+          <input type="text" data-i="${i}" value="${escapeHTML(v)}" placeholder="選択肢 ${i + 1}">
+          <button type="button" class="btn-remove" data-rem="${i}" ${formOptions.length <= 2 ? 'disabled' : ''}>×</button>
         </div>
-        <div class="status-q">${esc(data.question)}</div>
-        <ul class="status-opts">
-          ${data.options.map((o, i) => {
-            const v = data.votes[o] || 0;
-            const pct = total > 0 ? Math.round(v / total * 100) : 0;
-            return `<li>
-              <span class="opt-idx">${String(i + 1).padStart(2, '0')}</span>
-              <span class="opt-text">${esc(o)}</span>
-              <span class="opt-vote">${v}<span class="small">/ ${pct}%</span></span>
-            </li>`;
-          }).join('')}
-        </ul>
-        <div class="controls-row">
-          ${data.active
-            ? `<button class="btn-sec danger" type="button" id="btn-toggle">⏸ PAUSE SURVEY</button>`
-            : `<button class="btn-sec live-btn" type="button" id="btn-toggle">▶ GO LIVE</button>`}
-          <button class="btn-sec" type="button" id="btn-reset">↺ RESET VOTES</button>
-        </div>
-      `;
-      document.getElementById('btn-toggle').addEventListener('click', () => activate(!data.active));
-      document.getElementById('btn-reset').addEventListener('click', resetVotes);
+      `).join('');
+
+      list.querySelectorAll('input[data-i]').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          formOptions[Number(e.target.dataset.i)] = e.target.value;
+        });
+      });
+      list.querySelectorAll('[data-rem]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          syncFormOptionsFromDOM();
+          formOptions.splice(Number(btn.dataset.rem), 1);
+          renderOptions();
+        });
+      });
+    }
+    function syncFormOptionsFromDOM() {
+      const inputs = document.querySelectorAll('#options-list input[data-i]');
+      inputs.forEach(inp => {
+        formOptions[Number(inp.dataset.i)] = inp.value;
+      });
+    }
+    function openForm(id) {
+      stopPoll();
+      editingId = id || null;
+      const s = id ? state.surveys.find(x => x.id === id) : null;
+      $('#f-title').value = s ? s.title : '';
+      $('#f-question').value = s ? s.question : '';
+      formOptions = s ? s.options.slice() : ['', ''];
+      $('#form-mode').textContent = id ? 'EDIT SURVEY' : 'NEW SURVEY';
+      $('#form-heading').textContent = id ? 'EDIT' : 'CREATE';
+      renderOptions();
+      viewList.style.display = 'none';
+      viewForm.style.display = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function closeForm() {
+      viewForm.style.display = 'none';
+      viewList.style.display = '';
+      editingId = null;
+      loadState();
+      startPoll();
     }
 
-    function esc(s) {
-      const d = document.createElement('div');
-      d.textContent = s ?? '';
-      return d.innerHTML;
+    async function saveForm() {
+      syncFormOptionsFromDOM();
+      const title = $('#f-title').value.trim();
+      const question = $('#f-question').value.trim();
+      const options = formOptions.map(o => o.trim()).filter(Boolean);
+      if (!title) return toast('タイトルを入力', 'error');
+      if (!question) return toast('質問を入力', 'error');
+      if (options.length < 2) return toast('選択肢は2つ以上', 'error');
+      try {
+        if (editingId) {
+          await api('surveys/' + editingId, { method: 'PUT', body: { title, question, options } });
+          toast('UPDATED', 'success');
+        } else {
+          await api('surveys', { method: 'POST', body: { title, question, options } });
+          toast('CREATED', 'success');
+        }
+        closeForm();
+      } catch (e) {
+        toast(e.message, 'error');
+      }
     }
 
-    function showToast(msg, type = '') {
-      toast.textContent = msg;
-      toast.className = `toast show ${type}`;
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => toast.className = 'toast', 2500);
-    }
+    /* ---------- EVENT BINDINGS ---------- */
+    $('#btn-new').addEventListener('click', () => openForm(null));
+    $('#btn-back').addEventListener('click', closeForm);
+    $('#btn-cancel').addEventListener('click', closeForm);
+    $('#btn-save').addEventListener('click', saveForm);
+    $('#btn-add').addEventListener('click', () => {
+      syncFormOptionsFromDOM();
+      formOptions.push('');
+      renderOptions();
+    });
+    $('#btn-copy').addEventListener('click', async () => {
+      const url = new URL('vote.html', location.href).href;
+      try {
+        await navigator.clipboard.writeText(url);
+        toast('URL COPIED', 'success');
+      } catch {
+        toast('COPY FAILED', 'error');
+      }
+    });
 
-    renderOptions();
+    /* ---------- INIT ---------- */
+    loadState().then(() => startPoll());
   </script>
 </body>
 </html>
