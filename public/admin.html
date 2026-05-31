@@ -224,28 +224,23 @@
     }
     .card-actions {
       display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.35rem;
+      flex-wrap: nowrap;
       margin-top: 0.5rem;
     }
-    .card-actions .row {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    .card-actions .row.primary > button { flex: 1; }
     .card-actions button {
       background: transparent;
       border: 1px solid var(--line-strong);
       color: var(--text);
-      padding: 0.7rem 0.85rem;
+      padding: 0.55rem 0.5rem;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
+      font-size: 0.62rem;
       font-weight: 500;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       cursor: pointer;
       transition: all 0.2s;
+      white-space: nowrap;
     }
     .card-actions button:hover { border-color: var(--text); }
     .card-actions .act-activate {
@@ -691,12 +686,10 @@
             <div class="card-question">${escapeHTML(s.question)}</div>
             <div class="card-opts">${modeBadge}${opts}</div>
             <div class="card-actions">
-              <div class="row primary">${actBtn}</div>
-              <div class="row">
-                <button data-act="edit">EDIT</button>
-                <button data-act="reset">RESET</button>
-                <button class="act-delete" data-act="delete">DELETE</button>
-              </div>
+              ${actBtn}
+              <button data-act="edit">EDIT</button>
+              <button data-act="reset">RESET</button>
+              <button class="act-delete" data-act="delete">DELETE</button>
             </div>
           </div>
         `;
