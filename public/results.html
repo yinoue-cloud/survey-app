@@ -361,9 +361,11 @@
 
   <script>
     const COLORS = [
-      '#F97316','#10B981','#06B6D4','#EAB308',
-      '#8B5CF6','#3B82F6','#EC4899','#EF4444'
+      '#FB923C','#FACC15','#A3E635','#34D399',
+      '#2DD4BF','#22D3EE','#60A5FA','#A78BFA',
+      '#F472B6','#F87171'
     ];
+    const pickColor = (i) => COLORS[i % COLORS.length];
 
     let chart = null;
     let currentSurvey = null;
@@ -374,7 +376,7 @@
 
     function buildChart(labels, data, total) {
       const has = total > 0;
-      const bgColors = has ? COLORS.slice(0, labels.length) : labels.map(() => '#1F1F1F');
+      const bgColors = has ? labels.map((_, i) => pickColor(i)) : labels.map(() => '#1F1F1F');
       const cData = has ? data : labels.map(() => 1);
 
       if (chart) chart.destroy();
@@ -455,7 +457,7 @@
         chart.data.labels = labels;
         chart.data.datasets[0].data = has ? data : labels.map(() => 1);
         chart.data.datasets[0].backgroundColor = has
-          ? COLORS.slice(0, labels.length)
+          ? labels.map((_, i) => pickColor(i))
           : labels.map(() => '#1F1F1F');
         chart.update();
       }
@@ -466,7 +468,7 @@
         const pct = total > 0 ? Math.round(v / total * 100) : 0;
         return `<div class="legend-item" data-idx="${i}">
           <span class="leg-num">${String(i + 1).padStart(2, '0')}</span>
-          <span class="leg-color" style="background:${COLORS[i]}"></span>
+          <span class="leg-color" style="background:${pickColor(i)}"></span>
           <span class="leg-label">${esc(lbl)}</span>
           <span class="leg-count">${v}</span>
           <span class="leg-pct">${pct}%</span>
