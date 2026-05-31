@@ -224,19 +224,25 @@
     }
     .card-actions {
       display: flex;
-      gap: 0.4rem;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 0.5rem;
       margin-top: 0.5rem;
     }
+    .card-actions .row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .card-actions .row.primary > button { flex: 1; }
     .card-actions button {
       background: transparent;
       border: 1px solid var(--line-strong);
       color: var(--text);
-      padding: 0.55rem 0.6rem;
+      padding: 0.7rem 0.85rem;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.66rem;
+      font-size: 0.7rem;
       font-weight: 500;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       cursor: pointer;
       transition: all 0.2s;
@@ -674,7 +680,7 @@
         const modeBadge = `<span class="card-mode">${mode === 'multiple' ? '☰ MULTI' : '○ SINGLE'}</span>`;
         const actBtn = isActive
           ? `<button class="act-deactivate" data-act="deactivate">■ STOP</button>`
-          : `<button class="act-activate" data-act="activate">▶ ACTIVE</button>`;
+          : `<button class="act-activate" data-act="activate">▶ ACTIVATE</button>`;
         return `
           <div class="card ${isActive ? 'is-active' : ''}" data-id="${s.id}">
             <div class="card-head">
@@ -685,10 +691,12 @@
             <div class="card-question">${escapeHTML(s.question)}</div>
             <div class="card-opts">${modeBadge}${opts}</div>
             <div class="card-actions">
-              ${actBtn}
-              <button data-act="edit">EDIT</button>
-              <button data-act="reset">RESET</button>
-              <button class="act-delete" data-act="delete">DELETE</button>
+              <div class="row primary">${actBtn}</div>
+              <div class="row">
+                <button data-act="edit">EDIT</button>
+                <button data-act="reset">RESET</button>
+                <button class="act-delete" data-act="delete">DELETE</button>
+              </div>
             </div>
           </div>
         `;
