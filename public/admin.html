@@ -715,9 +715,13 @@
     }
 
     /* ---------- POLLING ---------- */
+    let fetchSeq = 0;
     async function loadState() {
+      const mySeq = ++fetchSeq;
       try {
-        state = await api('surveys');
+        const data = await api('surveys');
+        if (mySeq < fetchSeq) return;
+        state = data;
         if (viewList.style.display !== 'none') renderList();
         updateFab();
       } catch (e) {
@@ -735,10 +739,15 @@
 
     /* ---------- ACTIONS ---------- */
     async function handleCardAction(id, act) {
+      stopPoll();
       try {
         if (act === 'activate') {
+          const prevId = state.activeSurveyId;
+          const prevTitle = prevId && prevId !== id
+            ? (state.surveys.find(s => s.id === prevId) || {}).title
+            : null;
           await api('surveys/' + id + '/activate', { method: 'POST' });
-          toast('ACTIVATED', 'success');
+          toast(prevTitle ? `STOPPED → ACTIVATED` : 'ACTIVATED', 'success');
         } else if (act === 'deactivate') {
           await api('surveys/deactivate', { method: 'POST' });
           toast('STOPPED', 'success');
@@ -757,6 +766,8 @@
         await loadState();
       } catch (e) {
         toast(e.message, 'error');
+      } finally {
+        startPoll();
       }
     }
 
